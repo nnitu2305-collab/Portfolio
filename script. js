@@ -1,0 +1,170 @@
+// MOBILE NAVIGATION
+const menuBtn = document.getElementById("menu-btn");
+const navLinks = document.getElementById("nav-links");
+const navItems = document.querySelectorAll(".nav-links a");
+
+menuBtn.addEventListener("click", () => {
+    const isOpen = navLinks.classList.toggle("open");
+
+    menuBtn.setAttribute("aria-expanded", isOpen);
+    menuBtn.setAttribute(
+        "aria-label",
+        isOpen ? "Close navigation menu" : "Open navigation menu"
+    );
+
+    menuBtn.innerHTML = isOpen
+        ? '<i class="fas fa-times"></i>'
+        : '<i class="fas fa-bars"></i>';
+});
+
+// CLOSE MENU AFTER CLICK
+navItems.forEach(link => {
+    link.addEventListener("click", () => {
+        navLinks.classList.remove("open");
+        menuBtn.setAttribute("aria-expanded", "false");
+        menuBtn.setAttribute("aria-label", "Open navigation menu");
+        menuBtn.innerHTML = '<i class="fas fa-bars"></i>';
+    });
+});
+
+// TYPING ANIMATION
+const typingElement = document.getElementById("typing");
+
+const titles = [
+    "Aspiring Full-Stack Developer",
+    "Python Developer",
+    "Web Developer",
+    "Problem Solver"
+];
+
+const reduceMotion = window.matchMedia(
+    "(prefers-reduced-motion: reduce)"
+).matches;
+
+if (reduceMotion) {
+    typingElement.textContent = titles[0];
+} else {
+    let titleIndex = 0;
+    let characterIndex = 0;
+    let deleting = false;
+
+    function typeEffect() {
+        const currentTitle = titles[titleIndex];
+
+        if (!deleting) {
+            typingElement.textContent =
+                currentTitle.substring(0, characterIndex + 1);
+
+            characterIndex++;
+
+            if (characterIndex === currentTitle.length) {
+                deleting = true;
+                setTimeout(typeEffect, 1300);
+                return;
+            }
+        } else {
+            typingElement.textContent =
+                currentTitle.substring(0, characterIndex - 1);
+
+            characterIndex--;
+
+            if (characterIndex === 0) {
+                deleting = false;
+                titleIndex = (titleIndex + 1) % titles.length;
+            }
+        }
+
+        setTimeout(typeEffect, deleting ? 45 : 85);
+    }
+
+    typeEffect();
+}
+
+// REVEAL SECTIONS WHEN VISIBLE
+const revealElements = document.querySelectorAll(".reveal");
+
+if ("IntersectionObserver" in window && !reduceMotion) {
+    const revealObserver = new IntersectionObserver(
+        (entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add("visible");
+                    observer.unobserve(entry.target);
+                }
+            });
+        },
+        { threshold: 0.12 }
+    );
+
+    revealElements.forEach(element => {
+        revealObserver.observe(element);
+    });
+} else {
+    revealElements.forEach(element => {
+        element.classList.add("visible");
+    });
+}
+
+// ACTIVE NAVIGATION LINK
+const sections = document.querySelectorAll("main section[id]");
+
+if ("IntersectionObserver" in window) {
+    const sectionObserver = new IntersectionObserver(
+        entries => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    navItems.forEach(link => {
+                        const isActive =
+                            link.getAttribute("href") ===
+                            "#" + entry.target.id;
+
+                        link.classList.toggle("active", isActive);
+                    });
+                }
+            });
+        },
+        {
+            rootMargin: "-30% 0px -60% 0px"
+        }
+    );
+
+    sections.forEach(section => {
+        sectionObserver.observe(section);
+    });
+}
+
+// CURRENT YEAR
+document.getElementById("year").textContent =
+    new Date().getFullYear();
+
+// BACK TO TOP BUTTON
+const backToTop = document.getElementById("back-to-top");
+
+window.addEventListener("scroll", () => {
+    backToTop.classList.toggle("show", window.scrollY > 350);
+});
+
+backToTop.addEventListener("click", () => {
+    window.scrollTo({
+        top: 0,
+        behavior: reduceMotion ? "auto" : "smooth"
+    });
+});
+
+// CONTACT FORM VALIDATION
+const contactForm = document.getElementById("contact-form");
+const formStatus = document.getElementById("form-status");
+
+contactForm.addEventListener("submit", event => {
+    event.preventDefault();
+
+    if (!contactForm.checkValidity()) {
+        contactForm.reportValidity();
+        return;
+    }
+
+    formStatus.textContent =
+        "Your details are valid, but the form is not connected to an email service yet. No message has been sent.";
+
+    formStatus.style.color = "#C4B5FD";
+});
